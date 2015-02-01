@@ -21,6 +21,7 @@ import com.couchbase.capi.CAPIServer;
 import com.couchbase.capi.CouchbaseBehavior;
 import com.grallandco.impl.MongoCAPIBehavior;
 import com.grallandco.impl.MongoCouchbaseBehavior;
+import com.grallandco.util.VersionProvider;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,6 +38,7 @@ public class MongoDBCouchbaseReplicator {
 
     private static final String SERVER_BINDING              = "server.binding";
     private static final String SERVER_PORT                 = "server.port";
+    private static final String REPLICATION_TYPE            = "server.replication_type";
     private static final String SERVER_DEFAULT_COLLECTION   = "server.default_collection";
     private static final String SERVER_COLLECTION_FIELD     = "server.collection_field";
     private static final String SERVER_KEEP_META            = "server.keep_meta";
@@ -53,6 +55,7 @@ public class MongoDBCouchbaseReplicator {
 
     public static String    serverBinding      = "127.0.0.1";
     public static int       serverPort         = 8017;
+    public static String    replicationType = "update_only";
     public static String    defaultCollection  = "couchbase_data";
     public static String    collectionField    = "type";
     public static boolean   keepMeta           = false;
@@ -67,19 +70,18 @@ public class MongoDBCouchbaseReplicator {
     public static void main(String[] args) throws Exception {
 
         System.out.println("\n\n");
-        System.out.println("############################################");
-        System.out.println("#         MONGODB CAPI SERVER              #");
-        System.out.println("############################################\n\n");
-        System.out.println("\n\n");
-
+        System.out.println("##################################################");
+        System.out.println( String.format("##\t%s - %s ##", VersionProvider.getName(), VersionProvider.getVersion())  );
+        System.out.println("##################################################\n\n");
 
 
         if (args != null && args.length != 0) {
             setup(args[0]);
         }
 
-        System.out.println(new InetSocketAddress(serverBinding, serverPort));
-
+        System.out.println(String.format("Server starting on:  \t%s:%s", serverBinding,serverPort));
+        System.out.println(String.format("Number of vBuckets:  \t%s", vBucketNumber));
+        System.out.println(String.format("Replication type:  \t\t%s\n\n", replicationType));
 
         CouchbaseBehavior couchbaseBehavior = new MongoCouchbaseBehavior();
         CAPIBehavior capiBehavior = new MongoCAPIBehavior();
@@ -91,7 +93,6 @@ public class MongoDBCouchbaseReplicator {
                     username,
                     password,
                     vBucketNumber);
-
         capiServer.start();
 
 
@@ -128,6 +129,10 @@ public class MongoDBCouchbaseReplicator {
 
             if (prop.containsKey(SERVER_PORT)) {
                 serverPort = Integer.parseInt(prop.getProperty(SERVER_PORT));
+            }
+
+            if (prop.containsKey(REPLICATION_TYPE)) {
+                replicationType = prop.getProperty(REPLICATION_TYPE);
             }
 
             if (prop.containsKey(SERVER_DEFAULT_COLLECTION)) {

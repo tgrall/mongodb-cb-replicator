@@ -19,10 +19,7 @@ package com.grallandco.impl;
 import com.couchbase.capi.CAPIBehavior;
 import com.grallandco.MongoDBCouchbaseReplicator;
 import com.grallandco.util.MongoConnectionManager;
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DB;
-import com.mongodb.DBObject;
+import com.mongodb.*;
 import com.mongodb.util.JSON;
 
 import javax.xml.bind.DatatypeConverter;
@@ -56,7 +53,6 @@ public class MongoCAPIBehavior implements CAPIBehavior {
 
     @Override
     public Map<String, Object> getDatabaseDetails(String database) {
-        logger.log(Level.INFO, "MongoCAPIBehavior.getDatabaseDetails()");
         String doesNotExistReason = databaseExists(database);
         if (doesNotExistReason == null) {
             Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -84,7 +80,6 @@ public class MongoCAPIBehavior implements CAPIBehavior {
     @Override
     public Map<String, Object> revsDiff(String database,
                                         Map<String, Object> revsMap) {
-        logger.log(Level.INFO, "MongoCAPIBehavior.revsDiff()");
             Map<String, Object> responseMap = new HashMap<String, Object>();
             for (Map.Entry<String, Object> entry : revsMap.entrySet()) {
                 String id = entry.getKey();
@@ -109,7 +104,7 @@ public class MongoCAPIBehavior implements CAPIBehavior {
         List<Object> result = new ArrayList<Object>();
 
 
-
+        logger.log(Level.INFO, String.format("Replicating %d document(s)", docs.size()));
 
         for (Map<String, Object> doc : docs) {
             Map<String, Object> meta = (Map<String, Object>) doc.get("meta");
@@ -151,16 +146,25 @@ public class MongoCAPIBehavior implements CAPIBehavior {
                     collectionName = (String)o.get( MongoDBCouchbaseReplicator.collectionField );
                 }
 
-                System.out.println("DDEMO");
-
                 try {
-                    if (meta.containsKey("deleted")) {
-                        db.getCollection(collectionName).remove(BasicDBObjectBuilder.start("_id", meta.get("id")).get());
-                    } else {
+
+                    if (MongoDBCouchbaseReplicator.replicationType.equalsIgnoreCase("insert_only")) {
+                        // this will raise an exception
+                        db.getCollection(collectionName).insert(mongoJson);
+                    } else { // insert & update
                         db.getCollection(collectionName).save(mongoJson);
                     }
-                } catch (Exception e) {
-                    System.out.println( e.getMessage() );
+
+
+                } catch (MongoException e) {
+
+                    if ( e.getCode() == 11000) {
+                        logger.log(Level.INFO, "Not replicating updated document "+ meta.get("id"));
+                    } else {
+                        logger.log(Level.SEVERE,e.getMessage());
+                    }
+
+
                 }
 
             }
@@ -178,8 +182,6 @@ public class MongoCAPIBehavior implements CAPIBehavior {
 
     @Override
     public Map<String, Object> getDocument(String database, String docId) {
-        logger.log(Level.INFO, "MongoCAPIBehavior.getDocument()");
-
         if ("default".equals(database)) {
             if ("docid".equals(docId)) {
                 Map<String, Object> document = new HashMap<String, Object>();
@@ -194,22 +196,16 @@ public class MongoCAPIBehavior implements CAPIBehavior {
 
     @Override
     public Map<String, Object> getLocalDocument(String database, String docId) {
-        logger.log(Level.INFO, "MongoCAPIBehavior.getLocalDocument()");
-
         return null;
     }
 
     @Override
     public String storeDocument(String s, String s1, Map<String, Object> map) {
-        System.out.println("MongoCAPIBehavior.storeDocument()");
-
         return null;
     }
 
     @Override
     public String storeLocalDocument(String s, String s1, Map<String, Object> map) {
-        System.out.println("MongoCAPIBehavior.storeDocument()");
-
         return null;
     }
 

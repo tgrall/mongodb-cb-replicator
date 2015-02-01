@@ -7,6 +7,10 @@
     <groupId>com.grallandco</groupId>
     <artifactId>mongodb-cb-replicator</artifactId>
     <version>0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>MongoDB Couchbase Replicator</name>
+    <description>CAP Server used to copy replicate data from Couchbase to MongoDB</description>
 
     <dependencies>
         <dependency>
@@ -20,8 +24,46 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>2.13.0</version>
         </dependency>
-
     </dependencies>
 
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-2</version>
+                <executions>
+                    <execution>
+                        <id>create-executable-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>MongoCBReplicator</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assembly/assembly.xml</descriptor>
+                            </descriptors>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.grallandco.MongoDBCouchbaseReplicator</mainClass>
+                                </manifest>
+                                <manifestEntries>
+                                    <Class-Path>.</Class-Path>
+                                </manifestEntries>
+                            </archive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
