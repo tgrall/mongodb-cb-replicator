@@ -103,7 +103,7 @@ Once the server is started you can now configure Couchbase XDCR to send the data
 
 ## Demonstration
 
-<iframe width="854" height="510" src="https://www.youtube.com/embed/Fpl74Z0HbC0" frameborder="0" allowfullscreen></iframe>
+[![Couchbase to MongoDB Migration](http://img.youtube.com/vi/Fpl74Z0HbC0/0.jpg)](https://www.youtube.com/watch?v=Fpl74Z0HbC0)
 
 
 ## From Sources
