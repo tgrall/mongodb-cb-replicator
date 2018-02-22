@@ -35,9 +35,7 @@ import java.util.logging.Logger;
 public class MongoConnectionManager {
     private static final Logger logger = Logger.getLogger(MongoConnectionManager.class.getName());
 
-
     static  MongoClient client = null;
-
 
     /**
      * Get the MongoDB client
@@ -58,11 +56,10 @@ public class MongoConnectionManager {
             }
             client = new MongoClient(addressList);
 
-            } catch (UnknownHostException e) {
-                logger.log(Level.SEVERE, e.getMessage());
-                System.exit(1);
+            } catch (RuntimeException e) {
+              logger.log(Level.SEVERE, e.getMessage());
+              System.exit(1);
             }
-
 
             logger.log(Level.INFO, "MongoDB Replicator Connected to "+ addressList);
 
