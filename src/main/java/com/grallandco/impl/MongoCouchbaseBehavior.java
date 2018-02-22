@@ -29,20 +29,17 @@ public class MongoCouchbaseBehavior implements CouchbaseBehavior {
     String bucketUUid = null;
 
 
-    @Override
     public List<String> getPools() {
         List<String> result = new ArrayList<String>();
         result.add("default"); // keep the default pool
         return result;
     }
 
-    @Override
     public String getPoolUUID(String pool) {
         // TODO : improve this for production if needed
         return "00000000000000000000000000000000";
     }
 
-    @Override
     public Map<String, Object> getPoolDetails(String pool) {
         Map<String, Object> bucket = new HashMap<String, Object>();
         bucket.put("uri", "/pools/" + pool + "/buckets?uuid=" + getPoolUUID(pool));
@@ -50,7 +47,7 @@ public class MongoCouchbaseBehavior implements CouchbaseBehavior {
         Map<String, Object> responseMap = new HashMap<String, Object>();
         responseMap.put("buckets", bucket);
 
-        List<Object> nodes = getNodesServingPool(pool);
+        List<Map<String, Object>> nodes = getNodesServingPool(pool);
         responseMap.put("nodes", nodes);
         return responseMap;
     }
@@ -83,10 +80,10 @@ public class MongoCouchbaseBehavior implements CouchbaseBehavior {
      * @param pool name of the pool (only "default" is supported)
      * @return the information about the node
      */
-    public List<Object> getNodesServingPool(String pool) {
-        List<Object> nodes = null;
+    public List<Map<String, Object>>  getNodesServingPool(String pool) {
+        List<Map<String, Object>> nodes = null;
         if ("default".equals(pool)) {
-            nodes = new ArrayList<Object>();
+            nodes = new ArrayList<Map<String, Object>>();
             Map<String, Object> nodePorts = new HashMap<String, Object>();
             nodePorts.put("direct", MongoDBCouchbaseReplicator.serverPort);
             Map<String, Object> node = new HashMap<String, Object>();
